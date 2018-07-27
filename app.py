@@ -1,5 +1,8 @@
 # coding=utf8
 
+from __future__ import print_function
+from oauth2client import file, client, tools
+from googleapiclient import discovery
 from flask import Flask, request, abort
 from linebot import (LineBotApi, WebhookHandler)
 from linebot.exceptions import (InvalidSignatureError)
@@ -12,15 +15,10 @@ import string
 import re
 import urllib.request
 import sys
-#import datetime
-#import gspread
-#from bson import json_util
-#import json
-#from oauth2client.service_account import ServiceAccountCredentials as SAC
-#import random
-
-
- 
+import datetime
+import gspread
+import random
+from oauth2client.service_account import ServiceAccountCredentials as SAC
 
 app = Flask(__name__)
 
@@ -60,8 +58,8 @@ def movie():
 		title = data.text
 		link = data['href']
 		content+='{}\n{}\n'.format(title,link)
-		#content+=link
 	return content
+
 def apple_news():
 	target_url = 'https://tw.appledaily.com/new/realtime'
 	rs = requests.session()
@@ -109,7 +107,42 @@ def neihu_weather():
 		content+='{},{},{},{}\n'.format(day[i],night[i],title[i],link[i])
 	return title,link,day1,night	
 
+def sheet():
+	SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly'
+	store = file.Storage('credentials.json')
+	creds = store.get()
+	if not creds or creds.invalid:
+		flow = client.flow_from_clientsecrets('client_secret.json', SCOPES)
+		creds = tools.run_flow(flow, store)
+	service = discovery.build('sheets', 'v4', credentials=creds)
+	spreadsheet_id = '1JFbvWJU1qVa8ZijU27ZlKgkobDp-meJC9makyVk1Ps8' 
+	range_ = 'A:C'  
+	major_dimension = 'COLUMNS'
+	request = service.spreadsheets().values().get(spreadsheetId=spreadsheet_id, range=range_, majorDimension=major_dimension)
+	response = request.execute()
+	print(response['values'][0])
+	print(response['values'][1])
+	print(response['values'][2])
+	for i in range(1,len(response['values'][0])):
+		time=str(response['values'][0][0])+":"+str(response['values'][0][i])
+	return time
 
+def yui():
+	SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly'
+	store = file.Storage('credentials.json')
+	creds = store.get()
+	if not creds or creds.invalid:
+		flow = client.flow_from_clientsecrets('client_secret.json', SCOPES)
+		creds = tools.run_flow(flow, store)
+	service = discovery.build('sheets', 'v4', credentials=creds)
+	spreadsheet_id = '1Ar-JTbsVzCdqQRW_3FXraLD0eNAitfG-uXfgA2e1djg'
+	range_ = 'A:A' 
+	major_dimension = 'COLUMNS'
+	request = service.spreadsheets().values().get(spreadsheetId=spreadsheet_id, range=range_, majorDimension=major_dimension)
+	response = request.execute()
+	i=random.randrange(1,len(response['values'][0]))
+	picture=response['values'][0][i]
+	return picture
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
 	if "MVP" in event.message.text:
@@ -333,8 +366,15 @@ def handle_message(event):
 	elif event.message.text=="林昶志":
 		message = TextSendMessage(text="帥哥")
 		line_bot_api.reply_message(event.reply_token,message)
-
-		
+	elif event.message.text == "sheet":
+		a=sheet()
+		line_bot_api.reply_message(event.reply_token,TextSendMessage(text=a))
+	elif event.message.text == "yui":
+		a=yui()
+		message = ImageSendMessage(
+		original_content_url=a,
+		preview_image_url=a)
+		line_bot_api.reply_message(event.reply_token, message)
 		
 
 import os
