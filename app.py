@@ -77,8 +77,6 @@ def apple_news():
 		content.append(title)
 		content.append(link)
 		content.append(link2)
-	
-	
 	return content
 def neihu_weather():
 	target_url = 'https://www.cwb.gov.tw/V7/forecast/town368/7Day/6301000.htm'
@@ -103,8 +101,8 @@ def neihu_weather():
 		day1[i]=day1[i]+day2[i]
 	for i in range(len(link)):
 		link[i] = 'https://www.cwb.gov.tw'+link[i]
-	for i in range(14):
-		content+='{},{},{},{}\n'.format(day[i],night[i],title[i],link[i])
+		new_link
+	
 	return title,link,day1,night	
 
 def sheet():
@@ -143,12 +141,29 @@ def yui():
 	i=random.randrange(1,len(response['values'][0]))
 	picture=response['values'][0][i]
 	return picture
+
+def ben():
+	SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly'
+	store = file.Storage('credentials.json')
+	creds = store.get()
+	if not creds or creds.invalid:
+		flow = client.flow_from_clientsecrets('client_secret.json', SCOPES)
+		creds = tools.run_flow(flow, store)
+	service = discovery.build('sheets', 'v4', credentials=creds)
+	spreadsheet_id = '1Ar-JTbsVzCdqQRW_3FXraLD0eNAitfG-uXfgA2e1djg'
+	range_ = 'A:D' 
+	major_dimension = 'COLUMNS'
+	request = service.spreadsheets().values().get(spreadsheetId=spreadsheet_id, range=range_, majorDimension=major_dimension)
+	response = request.execute()
+	i=random.randrange(1,len(response['values'][3]))
+	picture=response['values'][3][i]
+	return picture
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
 	if "MVP" in event.message.text:
 		message = TextSendMessage(text="Durant!!")
 		line_bot_api.reply_message(event.reply_token,message)
-	elif "@Durant昶志" in event.message.text or "打球" in event.message.text:
+	elif "@Durant昶志" in event.message.text and "打球" in event.message.text:
 		message = TextSendMessage(text="拜託揪他打球，他很可憐沒球友，然後還有不要一直叫他請雞排，他很窮。")
 		line_bot_api.reply_message(event.reply_token,message)
 	elif event.message.text=="抽":
@@ -375,8 +390,27 @@ def handle_message(event):
 		original_content_url=a,
 		preview_image_url=a)
 		line_bot_api.reply_message(event.reply_token, message)
-		
-
+	elif event.message.text == "ben":
+		a=ben()
+		message = ImageSendMessage(
+		original_content_url=a,
+		preview_image_url=a)
+		line_bot_api.reply_message(event.reply_token, message)
+	elif event.message.text=="孔劉":
+		message = ImageSendMessage(
+		original_content_url='https://i.imgur.com/mTvybTm.jpg',
+		preview_image_url='https://i.imgur.com/mTvybTm.jpg')
+		line_bot_api.reply_message(event.reply_token, message)
+	elif event.message.text=="宋慧喬":
+		message = ImageSendMessage(
+		original_content_url='https://i.imgur.com/KWAlppC.jpg',
+		preview_image_url='https://i.imgur.com/KWAlppC.jpg')
+		line_bot_api.reply_message(event.reply_token, message)
+	elif event.message.text=="錢尼":
+		message = ImageSendMessage(
+		original_content_url='https://i.imgur.com/QOSRUrI.jpg',
+		preview_image_url='https://i.imgur.com/QOSRUrI.jpg')
+		line_bot_api.reply_message(event.reply_token, message)
 import os
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
