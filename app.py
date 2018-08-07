@@ -51,7 +51,7 @@ def movie():
 	res.encoding = 'utf-8'
 	soup = BeautifulSoup(res.text, 'html.parser')   
 	content = ""
-	for index, data in enumerate(soup.select('div.movielist_info h1 a')):
+	for index, data in enumerate(soup.select('div.movielist_info h2 a')):
 		if index ==15 :
 			return content
 		print(data)
@@ -101,9 +101,66 @@ def neihu_weather():
 		day1[i]=day1[i]+day2[i]
 	for i in range(len(link)):
 		link[i] = 'https://www.cwb.gov.tw'+link[i]
-		new_link
 	
 	return title,link,day1,night	
+def new_taipei_rain():
+	target_url = 'https://www.cwb.gov.tw//V7/forecast/taiwan/inc/city/New_Taipei_City.htm'
+	res = requests.get(target_url)
+	res.encoding = 'utf-8'
+	selector = etree.HTML(res.text)
+	content = ""
+	title = selector.xpath('//img/@title')
+	day = selector.xpath("//thead//th[@width='11%']//text()")
+	day1 = ""
+	day2 = ""
+	content=""
+	title_day=[]
+	title_night=[]
+	for i in range(0,14,2):
+		day1+=" "+day[i]
+	day1=day1.split()
+	for i in range(1,14,2):
+		day2+=" "+day[i]
+	day2 = day2.split()
+	for i in range(7):
+		day1[i] = day1[i] + day2[i]
+	for i in range(0,7):
+		title_day.append(title[i])
+	for i in range(7,14):
+		title_night.append(title[i])
+	for i in range(7):
+		a = day1[i] + "\n白天:" + title_day[i]+"\n晚上:" + title_night[i]+"\n\n"
+		content=content+a
+	return content
+def new_taipei_weather():
+	target_url = 'https://www.cwb.gov.tw//V7/forecast/taiwan/inc/city/New_Taipei_City.htm'
+	res = requests.get(target_url)
+	res.encoding = 'utf-8'
+	selector = etree.HTML(res.text)
+	content = ""
+	title = selector.xpath('//img/@title')
+	day = selector.xpath("//thead//th[@width='11%']//text()")
+	day1 = ""
+	day2 = ""
+	content=""
+	title_day=[]
+	title_night=[]
+	for i in range(0,14,2):
+		day1+=" "+day[i]
+	day1=day1.split()
+	for i in range(1,14,2):
+		day2+=" "+day[i]
+	day2 = day2.split()
+	for i in range(7):
+		day1[i] = day1[i] + day2[i]
+	for i in range(0,7):
+		title_day.append(title[i])
+	for i in range(7,14):
+		title_night.append(title[i])
+	for i in range(7):
+		a = day1[i] + "\n白天:" + title_day[i]+"\n晚上:" + title_night[i]+"\n\n"
+		content=content+a
+	return content	
 
 def sheet():
 	SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly'
@@ -158,6 +215,39 @@ def ben():
 	i=random.randrange(1,len(response['values'][3]))
 	picture=response['values'][3][i]
 	return picture
+
+def legs():
+	SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly'
+	store = file.Storage('credentials.json')
+	creds = store.get()
+	if not creds or creds.invalid:
+		flow = client.flow_from_clientsecrets('client_secret.json', SCOPES)
+		creds = tools.run_flow(flow, store)
+	service = discovery.build('sheets', 'v4', credentials=creds)
+	spreadsheet_id = '1Ar-JTbsVzCdqQRW_3FXraLD0eNAitfG-uXfgA2e1djg'
+	range_ = 'A:D' 
+	major_dimension = 'COLUMNS'
+	request = service.spreadsheets().values().get(spreadsheetId=spreadsheet_id, range=range_, majorDimension=major_dimension)
+	response = request.execute()
+	i=random.randrange(1,len(response['values'][1]))
+	picture=response['values'][1][i]
+	return picture
+def boobs():
+	SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly'
+	store = file.Storage('credentials.json')
+	creds = store.get()
+	if not creds or creds.invalid:
+		flow = client.flow_from_clientsecrets('client_secret.json', SCOPES)
+		creds = tools.run_flow(flow, store)
+	service = discovery.build('sheets', 'v4', credentials=creds)
+	spreadsheet_id = '1Ar-JTbsVzCdqQRW_3FXraLD0eNAitfG-uXfgA2e1djg'
+	range_ = 'A:D' 
+	major_dimension = 'COLUMNS'
+	request = service.spreadsheets().values().get(spreadsheetId=spreadsheet_id, range=range_, majorDimension=major_dimension)
+	response = request.execute()
+	i=random.randrange(1,len(response['values'][2]))
+	picture=response['values'][2][i]
+	return picture
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
 	if "MVP" in event.message.text:
@@ -198,11 +288,11 @@ def handle_message(event):
 			)
 		)		
 		line_bot_api.reply_message(event.reply_token, message)
-	elif event.message.text == "位置":
+	elif event.message.text=="位置":
 		line_bot_api.reply_message(event.reply_token,LocationSendMessage(title='my location', address='台北市信義區菸廠路', latitude=25.044545, longitude=121.561457))
 	elif "讚" in event.message.text :
 		line_bot_api.reply_message(event.reply_token,StickerSendMessage(package_id=1, sticker_id=13))
-	elif event.message.text == "按鈕":
+	elif event.message.text=="按鈕":
 		Confirm_template = TemplateSendMessage(
 		alt_text='目錄 template',
 		template=ConfirmTemplate(
@@ -222,7 +312,7 @@ def handle_message(event):
 			)
 		)
 		line_bot_api.reply_message(event.reply_token,Confirm_template)
-	elif event.message.text == "內湖天氣":
+	elif event.message.text=="內湖天氣":
 		title1,link1,day1,night1=neihu_weather()
 		Carousel_template = TemplateSendMessage(
 		alt_text='Carousel template',
@@ -309,10 +399,10 @@ def handle_message(event):
 		)
 		)
 		line_bot_api.reply_message(event.reply_token,Carousel_template)	
-	elif event.message.text == "電影":
+	elif event.message.text=="電影":
 		a=movie()
 		line_bot_api.reply_message(event.reply_token,TextSendMessage(text=a))
-	elif event.message.text == "新聞":
+	elif event.message.text=="新聞":
 		#a=apple_news()
 		#line_bot_api.reply_message(event.reply_token,TextSendMessage(text=a))
 		a=apple_news()
@@ -381,16 +471,16 @@ def handle_message(event):
 	elif event.message.text=="林昶志":
 		message = TextSendMessage(text="帥哥")
 		line_bot_api.reply_message(event.reply_token,message)
-	elif event.message.text == "sheet":
+	elif event.message.text=="sheet":
 		a=sheet()
 		line_bot_api.reply_message(event.reply_token,TextSendMessage(text=a))
-	elif event.message.text == "yui":
+	elif event.message.text=="yui":
 		a=yui()
 		message = ImageSendMessage(
 		original_content_url=a,
 		preview_image_url=a)
 		line_bot_api.reply_message(event.reply_token, message)
-	elif event.message.text == "ben":
+	elif event.message.text=="妹":
 		a=ben()
 		message = ImageSendMessage(
 		original_content_url=a,
@@ -406,10 +496,55 @@ def handle_message(event):
 		original_content_url='https://i.imgur.com/KWAlppC.jpg',
 		preview_image_url='https://i.imgur.com/KWAlppC.jpg')
 		line_bot_api.reply_message(event.reply_token, message)
+	elif event.message.text=="杜蘭特":
+		message = ImageSendMessage(
+		original_content_url='https://i.imgur.com/dzZR8kX.jpg',
+		preview_image_url='https://i.imgur.com/dzZR8kX.jpg')
+		line_bot_api.reply_message(event.reply_token, message)
+	elif event.message.text=="金城武":
+		message = ImageSendMessage(
+		original_content_url='https://i.imgur.com/dzZR8kX.jpg',
+		preview_image_url='https://i.imgur.com/dzZR8kX.jpg')
+		line_bot_api.reply_message(event.reply_token, message)		
 	elif event.message.text=="錢尼":
 		message = ImageSendMessage(
 		original_content_url='https://i.imgur.com/QOSRUrI.jpg',
 		preview_image_url='https://i.imgur.com/QOSRUrI.jpg')
+		line_bot_api.reply_message(event.reply_token, message)
+	elif event.message.text=="新北天氣":
+		a=new_taipei_weather()
+		line_bot_api.reply_message(event.reply_token,TextSendMessage(text=a))
+	elif "新北"in event.message.text and "雨" in event.message.text:
+		a=new_taipei_rain()
+		line_bot_api.reply_message(event.reply_token,TextSendMessage(text=a))
+	elif event.message.text=="胸" or event.message.text=="奶":
+		a=boobs()
+		message = ImageSendMessage(
+		original_content_url=a,
+		preview_image_url=a)
+		line_bot_api.reply_message(event.reply_token, message)
+	elif event.message.text=="腿":
+		a=legs()
+		message = ImageSendMessage(
+		original_content_url=a,
+		preview_image_url=a)
+		line_bot_api.reply_message(event.reply_token, message)
+	elif event.message.text=="想要":
+		message = ImagemapSendMessage(base_url='https://i.imgur.com/yqalzNK.jpg',alt_text='this is an imagemap',
+		base_size=BaseSize(height=1040, width=1040),
+		actions=[
+			#URIImagemapAction(link_uri='https://example.com/',area=ImagemapArea(x=520, y=0, width=520, height=1040)),
+			MessageImagemapAction(text='腿',area=ImagemapArea(x=0, y=0, width=520, height=520)),
+			MessageImagemapAction(text='胸',area=ImagemapArea(x=520, y=0, width=520, height=520)),
+			MessageImagemapAction(text='小丘',area=ImagemapArea(x=0, y=520, width=520, height=520)),
+			MessageImagemapAction(text='yui',area=ImagemapArea(x=520, y=520, width=520, height=520))
+		]
+		)
+		line_bot_api.reply_message(event.reply_token, message)
+	elif event.message.text=="麗筑愛人":
+		message = ImageSendMessage(
+		original_content_url='https://i.imgur.com/9LFYvXW.jpg',
+		preview_image_url='https://i.imgur.com/9LFYvXW.jpg')
 		line_bot_api.reply_message(event.reply_token, message)
 import os
 if __name__ == "__main__":
