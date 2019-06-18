@@ -264,6 +264,23 @@ def joanne():
 	i=random.randrange(1,len(response['values'][4]))
 	picture=response['values'][4][i]
 	return picture
+
+def toes():
+	SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly'
+	store = file.Storage('credentials.json')
+	creds = store.get()
+	if not creds or creds.invalid:
+		flow = client.flow_from_clientsecrets('client_secret.json', SCOPES)
+		creds = tools.run_flow(flow, store)
+	service = discovery.build('sheets', 'v4', credentials=creds)
+	spreadsheet_id = '1Ar-JTbsVzCdqQRW_3FXraLD0eNAitfG-uXfgA2e1djg'
+	range_ = 'A:E' 
+	major_dimension = 'COLUMNS'
+	request = service.spreadsheets().values().get(spreadsheetId=spreadsheet_id, range=range_, majorDimension=major_dimension)
+	response = request.execute()
+	i=random.randrange(1,len(response['values'][6]))
+	picture=response['values'][6][i]
+	return picture
 	
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
@@ -548,6 +565,12 @@ def handle_message(event):
 		line_bot_api.reply_message(event.reply_token, message)
 	elif event.message.text=="腿":
 		a=legs()
+		message = ImageSendMessage(
+		original_content_url=a,
+		preview_image_url=a)
+		line_bot_api.reply_message(event.reply_token, message)
+	elif event.message.text=="腳趾":
+		a=toes()
 		message = ImageSendMessage(
 		original_content_url=a,
 		preview_image_url=a)
